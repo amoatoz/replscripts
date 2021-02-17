@@ -10,17 +10,17 @@ object Wrapper {
 
 Wrapper(1)
 
-case class Debuggable(value: Int, message: String) {
-  def map(f:Int => Int)  = Debuggable(f(value), message)
-  def flatMap(f:Int => Debuggable) = {
+case class Debuggable[A](value: A, log: List[String]) {
+  def map[B](f:A => B)  = Debuggable(f(value), log)
+  def flatMap[B](f:A => Debuggable[B]) = {
     val newDebuggable = f(value)
-    Debuggable(newDebuggable.value, message + "\n" + newDebuggable.message)
+    Debuggable(newDebuggable.value, log  ::: newDebuggable.log)
   }
 }
 
-def f(a:Int) = Debuggable(a*2, s"Working with function f ${a*2}")
-def g(a:Int) = Debuggable(a*3, s"Working with function g  ${a*3}")
-def h(a:Int) = Debuggable(a*4, s"Working with function h ${a*4}")
+def f(a:Int) = Debuggable(a*2, List(s"Working with function f ${a*2}"))
+def g(a:Int) = Debuggable(a*3, List(s"Working with function g  ${a*3}"))
+def h(a:Int) = Debuggable(a*4, List(s"Working with function h ${a*4}"))
 
 val finalResult = for {
   fResult <- f(100)
@@ -29,4 +29,4 @@ val finalResult = for {
 } yield hResult
 
 println(s"value: ${finalResult.value}")
-println(s"message: ${finalResult.message}")
+println(s"message: ${finalResult.log}")
